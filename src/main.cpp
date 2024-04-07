@@ -84,6 +84,8 @@ void getServerHeader(std::string ip) {
 	}
 	if(serverHeader.find("ZyWALL") != std::string::npos) {
 		std::cout << "ZyWall found" << std::endl;
+		std::string command = "ip route add " + ip +" via 10.8.0.1 dev tun0";
+		system(command.c_str());
 		std::scoped_lock scope_lock_(db_mutex);
 		status = db->Put(rocksdb::WriteOptions(), ip, "b" + std::to_string(time(0)));
 		remove_ip(ip);
