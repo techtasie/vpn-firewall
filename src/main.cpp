@@ -62,12 +62,15 @@ void getServerHeader(std::string ip) {
 	std::string serverHeader;
 
 	curl_easy_setopt(curl, CURLOPT_URL, ip.c_str());
-	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &serverHeader);
 
-	curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
+        // Specify that we want to make a HEAD request
+        curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
+
+        // Set the callback function to receive the headers
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, &serverHeader);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
 	res = curl_easy_perform(curl);
