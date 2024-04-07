@@ -72,7 +72,7 @@ void getServerHeader(std::string ip) {
 
 	res = curl_easy_perform(curl);
 	if(res != CURLE_OK) {
-		std::cout << "Curl perform failed" << std::endl;
+		std::cerr << "Curl perform failed: " << curl_easy_strerror(res) << std::endl;
 		remove_ip(ip);
 		return;
 	}
@@ -85,10 +85,14 @@ void getServerHeader(std::string ip) {
 	if(serverHeader.find("ZyWALL") != std::string::npos) {
 		std::cout << "ZyWall found" << std::endl;
 		std::string command = "ip route add " + ip +" via 10.8.0.1 dev tun0";
-		system(command.c_str());
-		std::scoped_lock scope_lock_(db_mutex);
-		status = db->Put(rocksdb::WriteOptions(), ip, "b" + std::to_string(time(0)));
-		remove_ip(ip);
+		if(system(command.c_str()) == 0) {
+			std::cout << "Route added" << ip << std::endl;
+			std::scoped_lock scope_lock_(db_mutex);
+			status = db->Put(rocksdb::WriteOptions(), ip, "b" + std::to_string(time(0)));
+			remove_ip(ip);
+		} else {
+			std::cout << "Route failed" << ip << std::endl;
+		}
 		return;
 	}
 	curl_easy_cleanup(curl);

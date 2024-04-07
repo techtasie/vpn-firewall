@@ -1,3 +1,3 @@
 #!/bin/sh
 
-tcpdump -i any -p -nn | grep "IP" | awk '{print $5}' | sed 's/\.[^.]*$//' | ./ip-filter.py
+tcpdump -i eth0 -p -nn | grep "IP" | awk '{print $5}' | sed 's/\.[^.]*$//' | ./ip-filter.py
