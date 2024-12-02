@@ -19,10 +19,6 @@ const uint64_t TOTAL_BITS = TOTAL_IPV4_ADDRESSES * BITS_PER_ADDRESS;
 const uint64_t TOTAL_BYTES = TOTAL_BITS / BITS_IN_BYTE; // Total size in bytes
 const size_t BUFFER_SIZE = 4096; // Number of bytes to read at a time
 
-const uint8_t NOT_TESTED = 0;
-const uint8_t ALLOWED = 1;
-const uint8_t BLOCKED = 2;
-
 bool db::verify_db(const char *const path) {
     struct stat file_stat;
     if (stat(path, &file_stat) != 0) {
@@ -32,7 +28,7 @@ bool db::verify_db(const char *const path) {
     return file_stat.st_size == TOTAL_BYTES;
 }
 
-void db::gen_db(const char *const path) {
+void db::create_db(const char *const path) {
     std::ofstream file(path, std::ios::binary | std::ios::trunc);
     std::vector<char> buffer(TOTAL_BYTES, 0);
     file.write(buffer.data(), buffer.size());

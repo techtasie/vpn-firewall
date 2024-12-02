@@ -5,8 +5,10 @@
 #include <error.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <mutex>
 #include <stdexcept>
 #include <string.h>
+#include <iostream>
 
 int router::open_socket() {
   int sockfd = socket(AF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
@@ -23,7 +25,10 @@ void router::close_socket(int sockfd) { close(sockfd); }
 const char gateway_ip[] = "10.0.0.1";
 
 bool router::add_route(const char *const dst, int socketfd) {
+  std::lock_guard<std::mutex> lock(route_mutex);
   req request;
+
+  std::cout << "Adding route to " << dst << std::endl;
 
   struct rtattr *rta;
   struct sockaddr_nl sa;
@@ -107,6 +112,7 @@ bool router::add_route(const char *const dst, int socketfd) {
 }
 
 bool router::remove_route(const char *const dst, int socketfd) {
+  std::lock_guard<std::mutex> lock(route_mutex);
   req request;
 
   struct rtattr *rta;

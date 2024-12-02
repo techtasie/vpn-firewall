@@ -4,15 +4,20 @@
 #include <pcap.h>
 #include <curl/curl.h>
 #include <string>
+#include <memory>
+#include "unique_thread_safe_queue.hpp"
 
 namespace capture {
+	static std::shared_ptr<UniqueThreadSafeQueue<uint32_t>> queue = std::make_shared<UniqueThreadSafeQueue<uint32_t>>();
+
     void packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
                     const u_char *packet);
     // Needs to be wrapped in a try catch
-    void loop(const char *device);
+    void loop(const char *device, const char* path);
     size_t header_callback(char* buffer, size_t size, size_t nitems, std::string* serverHeader);
     size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
+    void worker_loop(int socketfd, const char* path);
     // Needs to be wrapped in a try catch
     bool lookup_ip_header(CURL* curl, const std::string &ip);
     bool is_public_ip(const uint32_t *decimal_ip);
