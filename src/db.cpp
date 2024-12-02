@@ -70,6 +70,7 @@ void db::set_bits(std::fstream &file, uint32_t address, uint8_t value) {
 
     file.seekg(bytePosition, std::ios::beg);
     file.write(reinterpret_cast<char *>(&byte), 1);
+    file.flush();
 }
 
 uint32_t db::ip_to_decimal(const std::string &ip) {

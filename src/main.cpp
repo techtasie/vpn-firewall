@@ -15,7 +15,7 @@
 
 const char FILENAME[] = "routes.db";
 const char INTERFACE[] = "wlp2s0";
-const uint16_t NUM_WORKER = 1;
+const uint16_t NUM_WORKER = 4;
 
 int main () {
 	if(!db::verify_db(FILENAME)) {
@@ -37,20 +37,6 @@ int main () {
 
 	std::cout << "Finished restoring routes" << std::endl;
 
-	std::thread capture_thread([]() {
-		//TODO TERMINATE THREAD
-		while(true) {
-			try {
-				capture::loop(INTERFACE, FILENAME);
-			} catch(const std::exception& e) {
-				std::cerr << e.what() << std::endl;
-			} catch (...) {
-				std::cerr << "Unknown exception caught in thread." << std::endl;
-			}
-			std::this_thread::sleep_for(std::chrono::milliseconds(200));
-		}
-	});
-
 	std::vector<std::thread> worker_threads;
 
 	for(uint16_t i = 0; i < NUM_WORKER; i++) {
@@ -68,8 +54,17 @@ int main () {
 		}));
 	}
 
+
+	//TODO TERMINATE THREAD
 	while(true) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+		try {
+			capture::loop(INTERFACE, FILENAME);
+		} catch(const std::exception& e) {
+			std::cerr << e.what() << std::endl;
+		} catch (...) {
+			std::cerr << "Unknown exception caught in thread." << std::endl;
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 
 	close(socketfd);

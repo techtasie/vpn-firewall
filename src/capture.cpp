@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <stdexcept>
 #include <iostream>
+#include <thread>
 
 bool capture::is_public_ip(const uint32_t *decimal_ip) {
     for (const IPRange& range : reserved_ips) {
@@ -28,7 +29,7 @@ void capture::worker_loop(int socketfd, const char* path) {
 
         if(ip.has_value()) {
             std::string ip_str = db::decimal_to_ip(ip.value());
-            std::cout << "Checking IP: " << ip_str << std::endl;
+            std::cout << "Checking IP: " << ip_str << " on thread: " << std::this_thread::get_id() << std::endl;
             if (lookup_ip_header(curl, ip_str)) {
                 // Synchronous handling logic for ZyWALL response
                 router::add_route(ip_str.c_str(), socketfd);
@@ -104,7 +105,7 @@ bool capture::lookup_ip_header(CURL* curl, const std::string &ip) {
         // throw std::runtime_error("Failed to perform curl request");
     }
 
-    std::cout << "HEADER: " << serverHeader << std::endl;
+    // std::cout << "HEADER: " << serverHeader << std::endl;
     if (serverHeader.find("ZyWALL") != std::string::npos) {
         std::cout << "ZyWall found for IP: " << ip << std::endl;
         // Synchronous handling logic for ZyWALL response

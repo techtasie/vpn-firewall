@@ -6,6 +6,8 @@
 #include <optional>
 #include <unordered_set>
 
+#include <iostream>
+
 template<typename T>
 class UniqueThreadSafeQueue {
 private:
