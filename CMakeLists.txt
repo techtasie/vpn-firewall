@@ -19,3 +19,9 @@ add_executable(vpn-firewall src/main.cpp src/capture.cpp src/router.cpp
   src/db.cpp)
 
 target_link_libraries(vpn-firewall CURL::libcurl ${PCAP_LIBRARY})
+
+add_custom_command(TARGET vpn-firewall POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E echo "Setting capabilities for vpn-firewall..."
+    COMMAND sudo setcap cap_net_raw,cap_net_admin+eip "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vpn-firewall"
+    COMMENT "Assigning capabilities to vpn-firewall (requires sudo)"
+)
