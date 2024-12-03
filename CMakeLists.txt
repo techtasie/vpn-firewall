@@ -11,10 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 find_package(CURL REQUIRED)
 find_library(PCAP_LIBRARY pcap REQUIRED)
 
-include_directories(${ROCKSDB_INCLUDE_DIRS})
-
-add_executable(read src/read.cpp src/db.cpp)
-add_executable(write src/write.cpp src/db.cpp)
+add_executable(vpn-read src/read.cpp src/db.cpp)
+add_executable(vpn-write src/write.cpp src/db.cpp)
 add_executable(vpn-firewall src/main.cpp src/capture.cpp src/router.cpp
   src/db.cpp)
 
@@ -24,4 +22,16 @@ add_custom_command(TARGET vpn-firewall POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "Setting capabilities for vpn-firewall..."
     COMMAND sudo setcap cap_net_raw,cap_net_admin+eip "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vpn-firewall"
     COMMENT "Assigning capabilities to vpn-firewall (requires sudo)"
+)
+
+install(TARGETS vpn-firewall
+    RUNTIME DESTINATION /usr/local/bin
+)
+
+install(TARGETS vpn-read
+    RUNTIME DESTINATION /usr/local/bin
+)
+
+install(TARGETS vpn-write
+    RUNTIME DESTINATION /usr/local/bin
 )

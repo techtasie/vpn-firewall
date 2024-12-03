@@ -25,20 +25,27 @@ void capture::worker_loop(int socketfd, const char* path) {
     CURL *curl = init_curl();
     std::fstream file(path);
     while (true) {
-        std::optional<uint32_t> ip = queue->pop();
+        try {
+            std::optional<uint32_t> ip = queue->pop();
 
-        if(ip.has_value()) {
-            std::string ip_str = db::decimal_to_ip(ip.value());
-            std::cout << "Checking IP: " << ip_str << " on thread: " << std::this_thread::get_id() << std::endl;
-            if (lookup_ip_header(curl, ip_str)) {
-                // Synchronous handling logic for ZyWALL response
-                router::add_route(ip_str.c_str(), socketfd);
-                db::set_bits(file, ip.value(), db::BLOCKED);
-            } else {
-                db::set_bits(file, ip.value(), db::ALLOWED);
+            if(ip.has_value()) {
+                std::string ip_str = db::decimal_to_ip(ip.value());
+                std::cout << "Checking IP: " << ip_str << " on thread: " << std::this_thread::get_id() << std::endl;
+                if (lookup_ip_header(curl, ip_str)) {
+                    // Synchronous handling logic for ZyWALL response
+                    router::add_route(ip_str.c_str(), socketfd);
+                    db::set_bits(file, ip.value(), db::BLOCKED);
+                } else {
+                    std::cout << "IP OK: " << ip_str << std::endl;
+                    db::set_bits(file, ip.value(), db::ALLOWED);
+                }
+
+                queue->mark_done(ip.value());
             }
-
-            queue->mark_done(ip.value());
+        } catch (std::exception &e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+        } catch (...) {
+            std::cerr << "Unknown error occurred" << std::endl;
         }
     }
 
@@ -100,9 +107,7 @@ bool capture::lookup_ip_header(CURL* curl, const std::string &ip) {
 
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
-        return false;
-        // TODO
-        // throw std::runtime_error("Failed to perform curl request");
+        throw std::runtime_error("Failed to perform curl request");
     }
 
     // std::cout << "HEADER: " << serverHeader << std::endl;

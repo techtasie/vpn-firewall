@@ -13,9 +13,9 @@
 #include <vector>
 #include <thread>
 
-const char FILENAME[] = "routes.db";
+const char FILENAME[] = "/var/lib/vpn-firewall/db.sqlite.db";
 const char INTERFACE[] = "wlp2s0";
-const uint16_t NUM_WORKER = 4;
+const uint16_t NUM_WORKER = 6;
 
 int main () {
 	if(!db::verify_db(FILENAME)) {
@@ -41,16 +41,7 @@ int main () {
 
 	for(uint16_t i = 0; i < NUM_WORKER; i++) {
 		worker_threads.push_back(std::thread([socketfd]() {
-			while(true) {
-				try {
 					capture::worker_loop(socketfd, FILENAME);
-				} catch(const std::exception& e) {
-					std::cerr << e.what() << std::endl;
-				} catch (...) {
-					std::cerr << "Unknown exception caught in thread." << std::endl;
-				}
-				std::this_thread::sleep_for(std::chrono::milliseconds(200));
-			}
 		}));
 	}
 

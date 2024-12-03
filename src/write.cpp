@@ -8,8 +8,7 @@
 
 const uint64_t BITS_PER_ADDRESS = 2;
 const uint64_t BITS_IN_BYTE = 8;
-//TODO Correct Path
-const char FILENAME[] = "ipv4_tracker.bin";
+const char FILENAME[] = "/var/lib/vpn-firewall/db.sqlite.db";
 
 int main() {
     // Open the file in read/write mode
