@@ -18,11 +18,16 @@ add_executable(vpn-firewall src/main.cpp src/capture.cpp src/router.cpp
 
 target_link_libraries(vpn-firewall CURL::libcurl ${PCAP_LIBRARY})
 
-add_custom_command(TARGET vpn-firewall POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "Setting capabilities for vpn-firewall..."
-    COMMAND sudo setcap cap_net_raw,cap_net_admin+eip "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vpn-firewall"
-    COMMENT "Assigning capabilities to vpn-firewall (requires sudo)"
-)
+option(SET_CAPABILITIES "Set capabilities for vpn-firewall (requires sudo)" OFF)
+if(SET_CAPABILITIES)
+    add_custom_command(TARGET vpn-firewall POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Setting capabilities for vpn-firewall..."
+        COMMAND sudo setcap cap_net_raw,cap_net_admin+eip "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/vpn-firewall"
+        COMMENT "Assigning capabilities to vpn-firewall (requires sudo)"
+    )
+else()
+    message(STATUS "Skipping setting capabilities for vpn-firewall (SET_CAPABILITIES is OFF)")
+endif()
 
 install(TARGETS vpn-firewall
     RUNTIME DESTINATION /usr/local/bin
