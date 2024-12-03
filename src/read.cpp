@@ -7,7 +7,7 @@
 
 const uint64_t BITS_PER_ADDRESS = 2;
 const uint64_t BITS_IN_BYTE = 8;
-const char FILENAME[] = "/var/lib/vpn-firewall/db.sqlite.db";
+const char FILENAME[] = "/var/lib/vpn-firewall/routes.db";
 
 int main() {
     // Open the file in read mode

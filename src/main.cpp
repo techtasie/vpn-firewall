@@ -13,7 +13,7 @@
 #include <vector>
 #include <thread>
 
-const char FILENAME[] = "/var/lib/vpn-firewall/db.sqlite.db";
+const char FILENAME[] = "/var/lib/vpn-firewall/routes.db";
 const char INTERFACE[] = "wlp2s0";
 const uint16_t NUM_WORKER = 6;
 
