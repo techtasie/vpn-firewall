@@ -96,13 +96,19 @@ size_t capture::header_callback(char* buffer, size_t size, size_t nitems, std::s
 }
 
 size_t capture::write_callback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-    return size * nmemb; // Ignore the body
+    std::string* response = static_cast<std::string*>(userdata);
+    response->append(ptr, size * nmemb);
+    return size * nmemb;
 }
+
 
 bool capture::lookup_ip_header(CURL* curl, const std::string &ip) {
     std::string serverHeader;
+    std::string responseBody;
+
     curl_easy_setopt(curl, CURLOPT_URL, ip.c_str());
     curl_easy_setopt(curl, CURLOPT_HEADERDATA, &serverHeader);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseBody);
 
     CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
@@ -113,6 +119,10 @@ bool capture::lookup_ip_header(CURL* curl, const std::string &ip) {
     if (serverHeader.find("ZyWALL") != std::string::npos) {
         std::cout << "ZyWall found for IP: " << ip << std::endl;
         // Synchronous handling logic for ZyWALL response
+        return true;
+    }
+    if (responseBody.find("<title>Zyxel Security Cloud-DNS Filter Service Portal</title>") != std::string::npos) {
+        std::cout << "Zyxel portal title found in the body for IP: " << ip << std::endl;
         return true;
     }
     return false;
