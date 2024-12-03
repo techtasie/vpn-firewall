@@ -25,9 +25,9 @@ void capture::worker_loop(int socketfd, const char* path) {
     CURL *curl = init_curl();
     std::fstream file(path);
     while (true) {
-        try {
-            std::optional<uint32_t> ip = queue->pop();
+        std::optional<uint32_t> ip = queue->pop();
 
+        try {
             if(ip.has_value()) {
                 std::string ip_str = db::decimal_to_ip(ip.value());
                 std::cout << "Checking IP: " << ip_str << " on thread: " << std::this_thread::get_id() << std::endl;
@@ -39,14 +39,13 @@ void capture::worker_loop(int socketfd, const char* path) {
                     std::cout << "IP OK: " << ip_str << std::endl;
                     db::set_bits(file, ip.value(), db::ALLOWED);
                 }
-
-                queue->mark_done(ip.value());
             }
         } catch (std::exception &e) {
             std::cerr << "Error: " << e.what() << std::endl;
         } catch (...) {
             std::cerr << "Unknown error occurred" << std::endl;
         }
+        queue->mark_done(ip.value());
     }
 
     file.close();

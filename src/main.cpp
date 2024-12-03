@@ -14,7 +14,7 @@
 #include <thread>
 
 const char FILENAME[] = "/var/lib/vpn-firewall/routes.db";
-const uint16_t NUM_WORKER = 6;
+const uint16_t NUM_WORKER = 20;
 
 int main (int argc, char* argv[]) {
 	if(!db::verify_db(FILENAME)) {
