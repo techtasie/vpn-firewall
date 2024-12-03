@@ -14,10 +14,9 @@
 #include <thread>
 
 const char FILENAME[] = "/var/lib/vpn-firewall/routes.db";
-const char INTERFACE[] = "wlp2s0";
 const uint16_t NUM_WORKER = 6;
 
-int main () {
+int main (int argc, char* argv[]) {
 	if(!db::verify_db(FILENAME)) {
 		db::create_db(FILENAME);
 	}
@@ -49,7 +48,7 @@ int main () {
 	//TODO TERMINATE THREAD
 	while(true) {
 		try {
-			capture::loop(INTERFACE, FILENAME);
+			capture::loop(argv[1], FILENAME);
 		} catch(const std::exception& e) {
 			std::cerr << e.what() << std::endl;
 		} catch (...) {
