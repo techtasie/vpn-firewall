@@ -2,7 +2,6 @@
 
 #include <cerrno>
 #include <cstdio>
-#include <error.h>
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
 #include <mutex>
