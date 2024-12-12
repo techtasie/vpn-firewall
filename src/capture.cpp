@@ -85,8 +85,8 @@ void capture::packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
     // Parse Ethernet header to get the EtherType
     const uint16_t eth_type = ntohs(*(uint16_t*)(packet + 12));
     // Only handle IPv4 packets
-    if (eth_type != 0x0800) { 
-        return; 
+    if (eth_type != 0x0800) {
+        return;
     }
 
     // IP header starts after Ethernet (14 bytes)
@@ -112,35 +112,34 @@ void capture::packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
         return;
     }
 
-    // Now apply the conditions:
     // 1) RST flag set
     bool rst_set = (tcp_header->th_flags & TH_RST) != 0;
 
-    // 2) TCP sequence number == 1
-    bool seq_is_one = (ntohl(tcp_header->th_seq) == 1);
+    // 2) TCP sequence number == 0
+    bool seq_is_zero = (ntohl(tcp_header->th_seq) == 0);
 
     // 3) Window size == 0
-    bool win_zero = (ntohs(tcp_header->th_win) == 0);
+    bool win_zero = (ntohs(tcp_header->window) == 0);
+
 
     // 4) TCP len == 0
     // TCP payload length = IP total length - IP header length - TCP header length
     uint16_t ip_total_len = ntohs(ip_header->ip_len);
     uint16_t payload_len = ip_total_len - ip_header_length - tcp_header_length;
     bool no_payload = (payload_len == 0);
-
-    if (!(rst_set && seq_is_one && win_zero && no_payload)) {
+    if (!(rst_set && seq_is_zero && win_zero && no_payload)) {
         // Doesn't match our criteria, do nothing
         return;
     }
 
-    // If we reach here, the packet matches the conditions
-    uint32_t dst_ip = ntohl(ip_header->ip_dst.s_addr);
+    uint32_t src_ip = ntohl(ip_header->ip_src.s_addr);
+    std::string ip = db::decimal_to_ip(src_ip);
 
-    if (!is_public_ip(&dst_ip)) {
+    if (!is_public_ip(&src_ip)) {
         return;
     }
 
-    std::string ip = db::decimal_to_ip(dst_ip);
+    std::cout << "REQ" << std::endl;
     router::add_route(ip.c_str(), socketfd);
 }
 
