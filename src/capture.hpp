@@ -13,7 +13,7 @@ namespace capture {
     void packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
                     const u_char *packet);
     // Needs to be wrapped in a try catch
-    void loop(const char *device, const int* socketfd);
+    void loop(const char *device, const char* path);
     size_t header_callback(char* buffer, size_t size, size_t nitems, std::string* serverHeader);
     size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userdata);
 

@@ -53,7 +53,7 @@ void capture::worker_loop(int socketfd, const char* path) {
     file.close();
 }
 
-void capture::loop(const char *device, const int* socketfd) {
+void capture::loop(const char *device, const char* path) {
     char errbuf[PCAP_ERRBUF_SIZE];
     pcap_t* handle;
     handle = pcap_open_live(device, 96, 0, 10, errbuf);
@@ -64,18 +64,21 @@ void capture::loop(const char *device, const int* socketfd) {
     }
 
     std::cout << "Starting to capture" << std::endl;
-    if (pcap_loop(handle, 0, packet_handler, reinterpret_cast<u_char *>(&socketfd)) < 0) {
+    std::fstream file(path);
+
+    if (pcap_loop(handle, 0, packet_handler, reinterpret_cast<u_char *>(&file)) < 0) {
         std::cerr << "pcap_loop() failed: " << pcap_geterr(handle);
         pcap_close(handle);
         throw std::runtime_error("Failed to loop through packets" + std::string(pcap_geterr(handle)));
     }
 
+    file.close();
     pcap_close(handle);
 }
 
 void capture::packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
                              const u_char *packet) {
-    int socketfd = *reinterpret_cast<int*>(user);
+    std::fstream *file = reinterpret_cast<std::fstream*>(user);
 
     // Check that we have enough bytes for Ethernet + IP header
     if (pkthdr->len < 14) {
@@ -139,8 +142,9 @@ void capture::packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
         return;
     }
 
-    std::cout << "REQ" << std::endl;
-    router::add_route(ip.c_str(), socketfd);
+    if(db::get_bits(*file, src_ip) == db::NOT_TESTED) {
+        queue->push(src_ip);
+    }
 }
 
 size_t capture::header_callback(char* buffer, size_t size, size_t nitems, std::string* serverHeader) {
