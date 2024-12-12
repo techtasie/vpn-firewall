@@ -130,6 +130,7 @@ void capture::packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
     uint16_t ip_total_len = ntohs(ip_header->ip_len);
     uint16_t payload_len = ip_total_len - ip_header_length - tcp_header_length;
     bool no_payload = (payload_len == 0);
+
     if (!(rst_set && seq_is_zero && win_zero && no_payload)) {
         // Doesn't match our criteria, do nothing
         return;
@@ -143,6 +144,7 @@ void capture::packet_handler(u_char *user, const struct pcap_pkthdr *pkthdr,
     }
 
     if(db::get_bits(*file, src_ip) == db::NOT_TESTED) {
+        std::cout << "qued " << src_ip << std::endl;
         queue->push(src_ip);
     }
 }

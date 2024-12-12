@@ -17,6 +17,11 @@ const char FILENAME[] = "/var/lib/vpn-firewall/routes.db";
 const uint16_t NUM_WORKER = 20;
 
 int main (int argc, char* argv[]) {
+	if(argc <= 1) {
+		std::cerr << "Usage: " << argv[0] << " <interface>" << std::endl;
+		return 1;
+	}
+
 	if(!db::verify_db(FILENAME)) {
 		db::create_db(FILENAME);
 	}
@@ -43,7 +48,6 @@ int main (int argc, char* argv[]) {
 					capture::worker_loop(socketfd, FILENAME);
 		}));
 	}
-
 
 	//TODO TERMINATE THREAD
 	while(true) {
